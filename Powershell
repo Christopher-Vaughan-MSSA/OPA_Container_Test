@@ -1,46 +1,65 @@
-#$url = "https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/AADConfig.rego"
-#$url = 'https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/'
-#https://github.com/cisagov/ScubaGear/blob/24a95e712c77b6b0d2f17b23be31c56814540235/PowerShell/ScubaGear/Rego/AADConfig.rego
-#PowerShell/ScubaGear/Rego/AADConfig.rego
-
-#$aadRego = Invoke-WebRequest -Uri $url -ContentType json -OutFile "C:\Users\TeamsTesting\Desktop\App\aadconfig.rego"
-
+# Variables
+$resourceGroup="opatest"
+$storageAccount="regostorage"
+$containerName="regocontainer"
+$blobContainerName="regoBlobContainer"
+$fileShareName="regoFileShareName"
 $fileNames = "AADConfig.rego", "DefenderConfig.rego", "EXOConfig.rego", "PowerPlatformConfig.rego", "SharepointConfig.rego", "TeamsConfig.rego"
 
+# Create a resource group
+#az group create --name $resourceGroup --location eastus
+
+# Create a storage account
+az storage account create --name $storageAccount --resource-group $resourceGroup --location eastus --sku Standard_LRS
+
+# Create a blob container
+az storage container create --account-name $storageAccount --name $blobContainerName
 
 foreach ($fileName in $fileNames){
     if($fileName -eq "AADConfig.rego"){
         $aadRego = Invoke-WebRequest -Uri https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/$fileName -ContentType json
         Write-Host ("Rego file for $fileName found")
+        az storage blob upload --account-name $storageAccount --container-name $blobContainerName --name AADConfig.rego --file $aadRego --content-type json
+        Write-Host ("Rego file for $fileName uploaded to Azure Storage")
         }
     elseif($fileName -eq "DefenderConfig.rego"){
         $defenderRego = Invoke-WebRequest -Uri https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/$fileName -ContentType json
         Write-Host ("Rego file for $fileName found")
+        az storage blob upload --account-name $storageAccount --container-name $blobContainerName --name DefenderConfig.rego --file $DefenderRego --content-type json
+        Write-Host ("Rego file for $fileName uploaded to Azure Storage")
         }
     elseif($fileName -eq "EXOConfig.rego"){
         $EXORego = Invoke-WebRequest -Uri https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/$fileName -ContentType json
         Write-Host ("Rego file for $fileName found")
+        az storage blob upload --account-name $storageAccount --container-name $blobContainerName --name EXOConfig.rego --file $EXORego --content-type json
+        Write-Host ("Rego file for $fileName uploaded to Azure Storage")
         }
     elseif($fileName -eq "PowerPlatformConfig.rego"){
         $PowerPlatformRego = Invoke-WebRequest -Uri https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/$fileName -ContentType json
         Write-Host ("Rego file for $fileName found")
+        az storage blob upload --account-name $storageAccount --container-name $blobContainerName --name PowerPlatformConfig.rego --file $PowerPlatformRego --content-type json
+        Write-Host ("Rego file for $fileName uploaded to Azure Storage")
         }
     elseif($fileName -eq "SharepointConfig.rego"){
         $SharePointRego = Invoke-WebRequest -Uri https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/$fileName -ContentType json
         Write-Host ("Rego file for $fileName found")
+        az storage blob upload --account-name $storageAccount --container-name $blobContainerName --name SharepointConfig.rego --file $SharePointRego --content-type json
+        Write-Host ("Rego file for $fileName uploaded to Azure Storage")
         }
     elseif($fileName -eq "TeamsConfig.rego"){
         $TeamsRego = Invoke-WebRequest -Uri https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/$fileName -ContentType json
         Write-Host ("Rego file for $fileName found")
+        az storage blob upload --account-name $storageAccount --container-name $blobContainerName --name TeamsConfig.rego --file $TeamsRego --content-type json
+        Write-Host ("Rego file for $fileName uploaded to Azure Storage")
         }
     else{
         Write-Host ("No rego file for $fileName found")
         }
 } 
 
-#Container creation
+# Get the storage account key
+accountKey=$(az storage account keys list --resource-group $resourceGroup --account-name $storageAccount --query '[0].value' --output tsv)
 
-az container create -g opatest --name opaapp --image openpolicyagent/opa 
-
-az container delete -g opatest --name opaapp
+# Create the container instance with the mounted storage
+az container create --resource-group $resourceGroup --name $containerName --image openpolicyagent/opa --azure-file-volume-account-name $storageAccount --azure-file-volume-account-key $accountKey --azure-file-volume-share-name $fileShareName --azure-file-volume-mount-path /mnt/rego
 
