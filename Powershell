@@ -1,0 +1,46 @@
+#$url = "https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/AADConfig.rego"
+#$url = 'https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/'
+#https://github.com/cisagov/ScubaGear/blob/24a95e712c77b6b0d2f17b23be31c56814540235/PowerShell/ScubaGear/Rego/AADConfig.rego
+#PowerShell/ScubaGear/Rego/AADConfig.rego
+
+#$aadRego = Invoke-WebRequest -Uri $url -ContentType json -OutFile "C:\Users\TeamsTesting\Desktop\App\aadconfig.rego"
+
+$fileNames = "AADConfig.rego", "DefenderConfig.rego", "EXOConfig.rego", "PowerPlatformConfig.rego", "SharepointConfig.rego", "TeamsConfig.rego"
+
+
+foreach ($fileName in $fileNames){
+    if($fileName -eq "AADConfig.rego"){
+        $aadRego = Invoke-WebRequest -Uri https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/$fileName -ContentType json
+        Write-Host ("Rego file for $fileName found")
+        }
+    elseif($fileName -eq "DefenderConfig.rego"){
+        $defenderRego = Invoke-WebRequest -Uri https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/$fileName -ContentType json
+        Write-Host ("Rego file for $fileName found")
+        }
+    elseif($fileName -eq "EXOConfig.rego"){
+        $EXORego = Invoke-WebRequest -Uri https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/$fileName -ContentType json
+        Write-Host ("Rego file for $fileName found")
+        }
+    elseif($fileName -eq "PowerPlatformConfig.rego"){
+        $PowerPlatformRego = Invoke-WebRequest -Uri https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/$fileName -ContentType json
+        Write-Host ("Rego file for $fileName found")
+        }
+    elseif($fileName -eq "SharepointConfig.rego"){
+        $SharePointRego = Invoke-WebRequest -Uri https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/$fileName -ContentType json
+        Write-Host ("Rego file for $fileName found")
+        }
+    elseif($fileName -eq "TeamsConfig.rego"){
+        $TeamsRego = Invoke-WebRequest -Uri https://github.com/cisagov/ScubaGear/raw/main/PowerShell/ScubaGear/Rego/$fileName -ContentType json
+        Write-Host ("Rego file for $fileName found")
+        }
+    else{
+        Write-Host ("No rego file for $fileName found")
+        }
+} 
+
+#Container creation
+
+az container create -g opatest --name opaapp --image openpolicyagent/opa 
+
+az container delete -g opatest --name opaapp
+
